@@ -21,8 +21,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "create-bucket": "aws s3 mb s3://$BUCKETNAME --region $REGION --profile $AWS_PROFILE",
-    "delete-bucket": "aws s3 rb s3://$BUCKETNAME --region $REGION --profile $AWS_PROFILE",
+    "create-bucket": "source .env && aws s3 mb s3://$BUCKETNAME --region $REGION --profile $AWS_PROFILE",
+    "delete-bucket": "source .env && aws s3 rb s3://$BUCKETNAME --region $REGION --profile $AWS_PROFILE",
     "predeploy": "del-cli build && npm run build",
     "deploy": "source .env && npm run predeploy && AWS_PROFILE=$AWS_PROFILE deploy-aws-s3-cloudfront --source=./build/ --bucket $BUCKETNAME --distribution $DIS --exclude .DS_Store --non-interactive",
     "redeploy": "source .env && AWS_PROFILE=$AWS_PROFILE deploy-aws-s3-cloudfront --source=./build/ --bucket $BUCKETNAME --distribution $DIS --exclude .DS_Store --non-interactive"
