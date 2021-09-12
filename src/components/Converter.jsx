@@ -1,7 +1,40 @@
-import { TextField, Button, InputAdornment } from '@material-ui/core';
-import PlayForWorkIcon from '@material-ui/icons/PlayForWork';
+import { TextField, Button, InputAdornment, Container } from '@material-ui/core';
+import { makeStyles, styled } from '@material-ui/core/styles';
 import axios from 'axios';
 import React, { useState } from 'react';
+
+const white = '#edf6f9';
+
+const MinifyButton = styled(Button)({
+  borderRadius: 3,
+  boxShadow: '0 3px 5px 2px rgba(105, 105, 105, .3)',
+  color: white,
+  height: 48,
+  padding: '0 30px',
+  backgroundColor: 'linear-gradient(45deg, #83c5be 30%, #006d77 90%)',
+})
+
+const StyledInput = styled(TextField)({
+  borderRadius: 3,
+  boxShadow: '0 3px 5px 2px rgba(105, 105, 105, .3)',
+  margin: '30px 6px 30px 0',
+  '& label': {
+    color: white,
+    paddingLeft: 8,
+  },
+  '& div': {
+    paddingLeft: 4,
+    '& input': {
+      color: white,
+    },
+  },
+})
+
+const CopyMessage = styled(InputAdornment)({
+  '& p': {
+    color: white
+  }
+})
 
 
 function Converter() {
@@ -55,19 +88,21 @@ function Converter() {
   }
 
   return (
-    <form className='converter' noValidate autoComplete="off" style={{width: '90%', color: '#e1f5fe'}}>
-      <TextField style={{ color: '#e1f5fe'}} id="input" label="https://..." placeholder='https://daa.best' variant='outlined' fullWidth value={url} onChange={(e) => update(e.target.value)} error={error}/>
-      <Button variant={!error && !!url ? "contained" : "outlined" } disabled={loading || !url64 || error} color="primary" onClick={shorten} style={{marginTop: '20px'}}>
-        Shrink!
-      </Button>
-      {/* <TextField id="encoded" label="Base64" fullWidth value={url64}/> */}
-      {short && <TextField id="shortcode" label="Short url" fullWidth 
-        value={short} onClick={copyToClipboard} 
-        InputProps={{
-          endAdornment: <InputAdornment position="end">{copyMsg}</InputAdornment>,
-        }}
-      />}
-    </form>
+    <Container maxWidth="sm">
+      <form className='converter' noValidate autoComplete="off">
+        <StyledInput id="input" label="https://..." placeholder='minify your link' fullWidth value={url} onChange={(e) => update(e.target.value)} error={error}/>
+        <MinifyButton variant={!error && !!url ? "contained" : "outlined" } disabled={loading || !url || error} color="primary" onClick={shorten} >
+          { short ? 'Done!' : 'Shrink!' }
+        </MinifyButton>
+        {/* <TextField id="encoded" label="Base64" fullWidth value={url64}/> */}
+        {short && <StyledInput id="shortcode" label="Short url" fullWidth 
+          value={short} onClick={copyToClipboard} onBlur={() => setCopyMsg('')}
+          InputProps={{
+            endAdornment: <CopyMessage position="end">{copyMsg}</CopyMessage>,
+          }}
+        />}
+      </form>
+    </Container>
   );
 }
 
