@@ -1,11 +1,14 @@
-
-
 .App {
   text-align: center;
-  background: url('./images/earth-nasa.jpeg');
+  background: url('../images/earth-nasa.jpeg');
   background-repeat: no-repeat;
-  /* background-size: auto; */
   background-size: cover;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  font-size: calc(10px + 2vmin);
 }
 
 .App-logo {
@@ -20,14 +23,8 @@
 }
 
 .App-header {
-  /* background-color: #282c34; */
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  font-size: calc(10px + 2vmin);
-  color: #e1f5fe !important;
+  color: #e1f5fe;
+  margin: 10vh 0; 
 }
 
 .App-link {
@@ -48,14 +45,21 @@
   left: 0;
   bottom: 0;
   width: 100%;
-  background-color: black;
+  background-color: #001219;
   color: white;
   text-align: center;
-  font-size: 10px;
-  min-height: 22px;
+  font-size: 12px;
+  min-height: 32px;
+  text-align: center;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
 }
+
 a {
   color: #edf6f9;
+  margin: 8px;
 }
 
 /* input {

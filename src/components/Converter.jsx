@@ -1,7 +1,11 @@
-import { TextField, Button, InputAdornment, Container } from '@material-ui/core';
-import { makeStyles, styled } from '@material-ui/core/styles';
+import { TextField, Button, InputAdornment, Container, CircularProgress } from '@material-ui/core';
+import { styled } from '@material-ui/core/styles';
 import axios from 'axios';
 import React, { useState } from 'react';
+
+import clipboardCopy from '../utils/clipboardCopy' 
+import highlightTarget from '../utils/highlight' 
+
 
 const white = '#edf6f9';
 
@@ -31,72 +35,77 @@ const StyledInput = styled(TextField)({
 })
 
 const CopyMessage = styled(InputAdornment)({
+  marginRight: 4,
   '& p': {
     color: white
   }
 })
 
-
-function Converter() {
+const Converter = ({strings}) => {
   const limit = 2048
   const [url, setUrl] = useState("");
   const [url64, setUrl64] = useState("");
   const [short, setShort] = useState('');
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [copyMsg, setCopyMsg] = useState('Click to copy');
-  const regex = new RegExp(/https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,}/gi)
+  const [copyMsg, setCopyMsg] = useState(strings.copyDefault);
+  const [btnText, setBtnText] = useState(strings.btnGo);
+  const regexBegins = /^((https?):\/\/)/ig;
+  const regex = new RegExp(/https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,}/i)
   const base = 'https://api.daa.best';
+  const regexSelf = /api.daa.best/i
 
   const shorten = async () => {
     if(!url64) return;
     setLoading(true);
     const res = await axios.post(base+'/links/'+url64,{}).catch(() => setLoading(false));
-    if (res && res.status === 200) 
+    if (res && res.status === 200)  {
       setShort(base+res.data.shortcode)
-    else 
+      setBtnText(strings.btnDone)
+    }
+    else {
       console.log(res)
+      setBtnText(strings.btnError)
+    }
     setLoading(false);
   }
 
   const update = (val) => {
+    if (short && val !== url) {
+      setBtnText(strings.btnGo);
+      setShort('')
+    }
     setUrl(val);
     if (!val) return setError(false)    
     const enc = btoa(val);
     const urlLong = enc.length > limit
-    if (val.match(regex) && !urlLong) {
+    if (!regexSelf.test(val) && regexBegins.test(val) && val.match(regex) && !urlLong) {
       setUrl64(enc)
       setError(false)
     } else {
-      setUrl64(urlLong ? "Url is too long!" : "Not a valid url!")
+      setUrl64(urlLong ? strings.errorUrlLong : strings.errorUrlInvalid)
       setError(true)
     } 
   }
 
-  const copyToClipboard = () => {
-    const copyTextarea = document.querySelector('#shortcode');
-    let copySuccess;
-    copyTextarea.focus();
-    copyTextarea.select();
-    try {
-      var successful = document.execCommand('copy');
-      copySuccess = successful ? 'successfully' : 'unsuccessfully';   
-    } catch (err) {
-      console.log(err);
-    }
-    setCopyMsg(`Copy ${copySuccess}!`)
-  }
+  const copy = () => ( clipboardCopy('#shortcode', (bool) => {
+    setCopyMsg(bool ? strings.copySuccess : strings.copyFailed )
+  })); 
 
   return (
     <Container maxWidth="sm">
       <form className='converter' noValidate autoComplete="off">
-        <StyledInput id="input" label="https://..." placeholder='minify your link' fullWidth value={url} onChange={(e) => update(e.target.value)} error={error}/>
-        <MinifyButton variant={!error && !!url ? "contained" : "outlined" } disabled={loading || !url || error} color="primary" onClick={shorten} >
-          { short ? 'Done!' : 'Shrink!' }
+        <StyledInput id="input" label={strings.inputLabel} 
+          placeholder={strings.ph} fullWidth value={url}  error={error} 
+          onChange={(e) => update(e.target.value)} 
+          onClick={() => highlightTarget('input')}
+        />
+        <MinifyButton variant={(!error && !!url) || short ? "contained" : "outlined" } disabled={loading || !url || error} color="primary" onClick={shorten} >
+          { loading ? '' : btnText }
+          { loading && <CircularProgress /> }
         </MinifyButton>
-        {/* <TextField id="encoded" label="Base64" fullWidth value={url64}/> */}
-        {short && <StyledInput id="shortcode" label="Short url" fullWidth 
-          value={short} onClick={copyToClipboard} onBlur={() => setCopyMsg('')}
+        {short && <StyledInput id="shortcode" label={strings.outputLabel} fullWidth 
+          value={short} onClick={copy} onBlur={() => setCopyMsg(strings.copyDefault)}
           InputProps={{
             endAdornment: <CopyMessage position="end">{copyMsg}</CopyMessage>,
           }}

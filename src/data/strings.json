@@ -1,0 +1,23 @@
+{
+  "header": {
+    "title": "Url Minify",
+    "caption": "minify your links"
+  },
+  "footer": {
+    "link": "https://api.daa.best/5c788e",
+    "creator": "Daa.Best"
+  },
+  "converter": {
+    "inputLabel": "https://...",
+    "outputLabel": "short link",
+    "ph": " ",
+    "btnGo": "Shrink!",
+    "btnDone": "Done",
+    "btnError": "Server Error",
+    "copyDefault": "Click to copy",
+    "copySuccess": "Copied Successfully!",
+    "copyFailed": "Copied failed.",
+    "errorUrlLong": "link is too long!",
+    "errorUrlInvalid": "a valid url starts with https://"
+  }
+}
