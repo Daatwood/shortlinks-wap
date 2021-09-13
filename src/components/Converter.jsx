@@ -1,11 +1,10 @@
-import { TextField, Button, InputAdornment, Container, CircularProgress } from '@material-ui/core';
+import { TextField, Button, InputAdornment, Container, CircularProgress, Typography } from '@material-ui/core';
 import { styled } from '@material-ui/core/styles';
 import axios from 'axios';
 import React, { useState } from 'react';
-
+import Qrcode from './Qrcode';
 import clipboardCopy from '../utils/clipboardCopy' 
 import highlightTarget from '../utils/highlight' 
-
 
 const white = '#edf6f9';
 
@@ -15,10 +14,11 @@ const MinifyButton = styled(Button)({
   color: white,
   height: 48,
   padding: '0 30px',
-  backgroundColor: 'linear-gradient(45deg, #83c5be 30%, #006d77 90%)',
+  backgroundColor: 'rgba(0,0,0,0.4)',
 })
 
 const StyledInput = styled(TextField)({
+  backgroundColor: 'rgba(0,0,0,0.4)',
   borderRadius: 3,
   boxShadow: '0 3px 5px 2px rgba(105, 105, 105, .3)',
   margin: '30px 6px 30px 0',
@@ -46,6 +46,7 @@ const Converter = ({strings}) => {
   const [url, setUrl] = useState("");
   const [url64, setUrl64] = useState("");
   const [short, setShort] = useState('');
+  const [lastShort, setLastShort] = useState('');
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
   const [copyMsg, setCopyMsg] = useState(strings.copyDefault);
@@ -73,6 +74,7 @@ const Converter = ({strings}) => {
   const update = (val) => {
     if (short && val !== url) {
       setBtnText(strings.btnGo);
+      setLastShort(short)
       setShort('')
     }
     setUrl(val);
@@ -100,17 +102,25 @@ const Converter = ({strings}) => {
           onChange={(e) => update(e.target.value)} 
           onClick={() => highlightTarget('input')}
         />
-        <MinifyButton variant={(!error && !!url) || short ? "contained" : "outlined" } disabled={loading || !url || error} color="primary" onClick={shorten} >
+        {btnText !== strings.btnDone && <MinifyButton variant={(!error && !!url) || short ? "contained" : "outlined" } disabled={loading || !url || error} color="primary" onClick={shorten} >
           { loading ? '' : btnText }
           { loading && <CircularProgress /> }
-        </MinifyButton>
+        </MinifyButton>}
+        { short &&  <Qrcode url={short}/> }
         {short && <StyledInput id="shortcode" label={strings.outputLabel} fullWidth 
           value={short} onClick={copy} onBlur={() => setCopyMsg(strings.copyDefault)}
           InputProps={{
             endAdornment: <CopyMessage position="end">{copyMsg}</CopyMessage>,
           }}
-        />}
+         />
+        }
       </form>
+      { lastShort && 
+        <div className='last-url'>
+          <Typography variant='caption'>last url: </Typography>
+          <Typography variant='overline'>{lastShort}</Typography>
+        </div>
+      }
     </Container>
   );
 }
