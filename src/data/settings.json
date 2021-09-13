@@ -1,0 +1,7 @@
+{
+  "domain": "api.daa.best",
+  "white": "#edf6f9",
+  "gray": "#b2b9bb",
+  "padding": 4,
+  "limit": 2048
+}

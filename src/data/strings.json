@@ -8,7 +8,7 @@
     "creator": "Daa.Best"
   },
   "converter": {
-    "inputLabel": "https://...",
+    "inputLabel": "your link here",
     "outputLabel": "short link",
     "ph": " ",
     "btnGo": "Shrink!",
@@ -16,8 +16,6 @@
     "btnError": "Server Error",
     "copyDefault": "Click to copy",
     "copySuccess": "Copied Successfully!",
-    "copyFailed": "Copied failed.",
-    "errorUrlLong": "link is too long!",
-    "errorUrlInvalid": "a valid url starts with https://"
+    "copyFailed": "Copied failed."
   }
 }

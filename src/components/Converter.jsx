@@ -1,10 +1,13 @@
-import { TextField, Button, InputAdornment, Container, CircularProgress, Typography } from '@material-ui/core';
+import { Button, InputAdornment, Container, CircularProgress, Typography } from '@material-ui/core';
+import { Check, Error } from '@material-ui/icons';
 import { styled } from '@material-ui/core/styles';
-import axios from 'axios';
 import React, { useState } from 'react';
 import Qrcode from './Qrcode';
 import clipboardCopy from '../utils/clipboardCopy' 
 import highlightTarget from '../utils/highlight' 
+import StyledInput from './StyledInput'
+import validateUrl from '../utils/validateUrl';
+import { shortenUrl } from '../actions';
 
 const white = '#edf6f9';
 
@@ -17,23 +20,6 @@ const MinifyButton = styled(Button)({
   backgroundColor: 'rgba(0,0,0,0.4)',
 })
 
-const StyledInput = styled(TextField)({
-  backgroundColor: 'rgba(0,0,0,0.4)',
-  borderRadius: 3,
-  boxShadow: '0 3px 5px 2px rgba(105, 105, 105, .3)',
-  margin: '30px 6px 30px 0',
-  '& label': {
-    color: white,
-    paddingLeft: 8,
-  },
-  '& div': {
-    paddingLeft: 4,
-    '& input': {
-      color: white,
-    },
-  },
-})
-
 const CopyMessage = styled(InputAdornment)({
   marginRight: 4,
   '& p': {
@@ -42,7 +28,6 @@ const CopyMessage = styled(InputAdornment)({
 })
 
 const Converter = ({strings}) => {
-  const limit = 2048
   const [url, setUrl] = useState("");
   const [url64, setUrl64] = useState("");
   const [short, setShort] = useState('');
@@ -51,23 +36,17 @@ const Converter = ({strings}) => {
   const [loading, setLoading] = useState(false);
   const [copyMsg, setCopyMsg] = useState(strings.copyDefault);
   const [btnText, setBtnText] = useState(strings.btnGo);
-  const regexBegins = /^((https?):\/\/)/ig;
-  const regex = new RegExp(/https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,}/i)
-  const base = 'https://api.daa.best';
-  const regexSelf = /api.daa.best/i
 
-  const shorten = async () => {
+  const shorten = () => {
     if(!url64) return;
     setLoading(true);
-    const res = await axios.post(base+'/links/'+url64,{}).catch(() => setLoading(false));
-    if (res && res.status === 200)  {
-      setShort(base+res.data.shortcode)
-      setBtnText(strings.btnDone)
-    }
-    else {
-      console.log(res)
-      setBtnText(strings.btnError)
-    }
+    shortenUrl(url64, (newUrl) => {
+      setShort(newUrl);
+      setBtnText(strings.btnDone);
+    }, (err) => {
+      console.log(err);
+      setBtnText(strings.btnError);
+    });
     setLoading(false);
   }
 
@@ -75,19 +54,22 @@ const Converter = ({strings}) => {
     if (short && val !== url) {
       setBtnText(strings.btnGo);
       setLastShort(short)
-      setShort('')
+      setShort(false)
     }
+
     setUrl(val);
-    if (!val) return setError(false)    
-    const enc = btoa(val);
-    const urlLong = enc.length > limit
-    if (!regexSelf.test(val) && regexBegins.test(val) && val.match(regex) && !urlLong) {
-      setUrl64(enc)
+    if (!val) {
+      setError(false);
+      return;
+    }
+
+    const validUrl = validateUrl(val.trim());
+    if (!!validUrl){
+      setUrl64(btoa(validUrl))
       setError(false)
     } else {
-      setUrl64(urlLong ? strings.errorUrlLong : strings.errorUrlInvalid)
-      setError(true)
-    } 
+      setError(true);
+    }
   }
 
   const copy = () => ( clipboardCopy('#shortcode', (bool) => {
@@ -97,22 +79,45 @@ const Converter = ({strings}) => {
   return (
     <Container maxWidth="sm">
       <form className='converter' noValidate autoComplete="off">
-        <StyledInput id="input" label={strings.inputLabel} 
-          placeholder={strings.ph} fullWidth value={url}  error={error} 
+        <StyledInput 
+          fullWidth 
+          id="input" 
+          label={strings.inputLabel} 
+          placeholder={strings.ph} 
+          value={url}  
+          error={error} 
           onChange={(e) => update(e.target.value)} 
           onClick={() => highlightTarget('input')}
+          InputProps={{
+            endAdornment: !url ? '' : !error ? 
+              <Check color='primary' fontSize="large"/> : 
+              <Error fontSize="large" color='secondary'/> ,
+          }}
         />
-        {btnText !== strings.btnDone && <MinifyButton variant={(!error && !!url) || short ? "contained" : "outlined" } disabled={loading || !url || error} color="primary" onClick={shorten} >
+        { btnText !== strings.btnDone && 
+          <MinifyButton 
+            color="primary" 
+            onClick={shorten}
+            variant={(!error && !!url) || short ? "contained" : "outlined" } 
+            disabled={loading || !url || error}
+          >
           { loading ? '' : btnText }
           { loading && <CircularProgress /> }
-        </MinifyButton>}
-        { short &&  <Qrcode url={short}/> }
-        {short && <StyledInput id="shortcode" label={strings.outputLabel} fullWidth 
-          value={short} onClick={copy} onBlur={() => setCopyMsg(strings.copyDefault)}
-          InputProps={{
-            endAdornment: <CopyMessage position="end">{copyMsg}</CopyMessage>,
-          }}
-         />
+          </MinifyButton>
+        }
+        { short && <Qrcode url={short}/> }
+        { short && 
+          <StyledInput 
+            fullWidth 
+            id="shortcode" 
+            label={strings.outputLabel} 
+            value={short} 
+            onClick={copy} 
+            onBlur={() => setCopyMsg(strings.copyDefault)}
+            InputProps={{
+              endAdornment: <CopyMessage position="end">{copyMsg}</CopyMessage>,
+            }}
+          />
         }
       </form>
       { lastShort && 
