@@ -71,11 +71,11 @@ svg {
   color: white;
   text-align: center;
   font-size: 12px;
-  min-height: 32px;
+  min-height: 48px;
   text-align: center;
   display: flex;
   flex-direction: row;
-  align-items: center;
+  align-items: baseline;
   justify-content: center;
 }
 
