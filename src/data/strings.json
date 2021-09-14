@@ -12,6 +12,7 @@
     "outputLabel": "short link",
     "ph": " ",
     "btnGo": "Shrink!",
+    "btnView": "Inspect",
     "btnDone": "Done",
     "btnError": "Server Error",
     "copyDefault": "Click to copy",

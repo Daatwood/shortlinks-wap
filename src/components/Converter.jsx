@@ -1,13 +1,13 @@
-import { Button, InputAdornment, Container, CircularProgress, Typography } from '@material-ui/core';
-import { Check, Error } from '@material-ui/icons';
+import { Button, InputAdornment, Container, CircularProgress, Typography, Paper } from '@material-ui/core';
+import { Check, Error, Visibility } from '@material-ui/icons';
 import { styled } from '@material-ui/core/styles';
 import React, { useState } from 'react';
 import Qrcode from './Qrcode';
 import clipboardCopy from '../utils/clipboardCopy' 
 import highlightTarget from '../utils/highlight' 
 import StyledInput from './StyledInput'
-import validateUrl from '../utils/validateUrl';
-import { shortenUrl } from '../actions';
+import validateUrl, { shortcodeUrl } from '../utils/validateUrl';
+import { shortenUrl, viewUrl } from '../actions';
 
 const white = '#edf6f9';
 
@@ -36,6 +36,8 @@ const Converter = ({strings}) => {
   const [loading, setLoading] = useState(false);
   const [copyMsg, setCopyMsg] = useState(strings.copyDefault);
   const [btnText, setBtnText] = useState(strings.btnGo);
+  const [decoding, setDecoding] = useState(false);
+  const [stats, setStats] = useState(false);
 
   const shorten = () => {
     if(!url64) return;
@@ -50,26 +52,52 @@ const Converter = ({strings}) => {
     setLoading(false);
   }
 
+  const expand = () => {
+    if (!decoding) return;
+    setLoading(true);
+    viewUrl(decoding, (res) => {
+      setStats(res);
+      setBtnText(strings.btnDone);
+    }, (err) => {
+      console.log(err);
+      setBtnText(strings.btnError);
+    });
+    setLoading(false);
+  }
+
   const update = (val) => {
-    if (short && val !== url) {
+    val = val.trim();
+    if ((short || stats) && val !== url) {
       setBtnText(strings.btnGo);
       setLastShort(short)
-      setShort(false)
+      setShort(false);
+      setStats(false);
     }
 
     setUrl(val);
-    if (!val) {
+    if (!val) { // Clear error; value is blank
       setError(false);
       return;
     }
 
-    const validUrl = validateUrl(val.trim());
-    if (!!validUrl){
+    const scode = shortcodeUrl(val);
+    if(scode){ // User entered a shortcode url
+      setError(false)
+      setDecoding(scode);
+      setBtnText(strings.btnView);
+      return;
+    }
+
+    const validUrl = validateUrl(val);
+    if (!!validUrl){ // User entered a valid url
       setUrl64(btoa(validUrl))
       setError(false)
+      setBtnText(strings.btnGo);
     } else {
       setError(true);
     }
+
+    if (!!decoding) setDecoding(null);
   }
 
   const copy = () => ( clipboardCopy('#shortcode', (bool) => {
@@ -90,14 +118,16 @@ const Converter = ({strings}) => {
           onClick={() => highlightTarget('input')}
           InputProps={{
             endAdornment: !url ? '' : !error ? 
-              <Check color='primary' fontSize="large"/> : 
+              decoding ? 
+                <Visibility color='primary' fontSize="large"/> :
+                <Check color='primary' fontSize="large"/> : 
               <Error fontSize="large" color='secondary'/> ,
           }}
         />
         { btnText !== strings.btnDone && 
           <MinifyButton 
             color="primary" 
-            onClick={shorten}
+            onClick={!decoding ?  shorten : expand}
             variant={(!error && !!url) || short ? "contained" : "outlined" } 
             disabled={loading || !url || error}
           >
@@ -118,6 +148,14 @@ const Converter = ({strings}) => {
               endAdornment: <CopyMessage position="end">{copyMsg}</CopyMessage>,
             }}
           />
+        }
+        { stats && 
+          <Paper>
+            <Typography variant='caption'>Full Link:</Typography>
+            <Typography variant='subtitle1'>{stats.link}</Typography>
+            <Typography variant='caption'>Redirects:</Typography>
+            <Typography variant='overline'>{stats.redirects}</Typography>
+          </Paper>
         }
       </form>
       { lastShort && 

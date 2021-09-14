@@ -7,5 +7,5 @@ export const shortenUrl = async (url, onSuccess, onError) => {
 
 export const viewUrl = async  (url, onSuccess, onError) => {
   const res = await adapter().get(base+'/v/'+url).catch(onError);
-  res && res.status === 200 ? onSuccess(res) : onError(res);
+  res && res.status === 200 ? onSuccess(res.data.Item) : onError(res);
 }
