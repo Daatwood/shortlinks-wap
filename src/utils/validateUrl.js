@@ -2,7 +2,6 @@ import settings from '../data/settings.json';
 
 const regexHtml = new RegExp(/^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/,"gm")
 const regexSelf = new RegExp(`${settings.domain}`, 'i');
-const regexShortcode = new RegExp(/(?<=\/)[^\/]+/)
 
 const matchingUrl = (url, regex) => {
   if (!url) return null;
@@ -18,5 +17,5 @@ export default validateUrl;
 export const shortcodeUrl = (url) => {
   let mUrl = matchingUrl(url, regexHtml);
   if (!regexSelf.test(mUrl)) return null;
-  return mUrl.replace('https://','').match(regexShortcode);
+  return mUrl.replace('https://','').split('/')[1];
 }
