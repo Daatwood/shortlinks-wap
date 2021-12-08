@@ -1,10 +1,10 @@
 {
   "header": {
-    "title": "Url Minify",
-    "caption": "minify your links"
+    "title": "URL to QR",
+    "caption": "QR'ify your links!"
   },
   "footer": {
-    "link": "https://api.daa.best/me",
+    "link": "https://url2qr.com/me",
     "creator": "Daa.Best"
   },
   "converter": {
