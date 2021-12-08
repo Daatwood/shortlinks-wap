@@ -1,5 +1,6 @@
 {
-  "domain": "api.url2qr.com",
+  "domain": "url2qr.com",
+  "api": "api.url2qr.com",
   "white": "#edf6f9",
   "gray": "#b2b9bb",
   "padding": 4,

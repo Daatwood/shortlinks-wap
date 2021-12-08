@@ -1,10 +1,11 @@
 import axios from 'axios';
 import settings from '../data/settings.json';
 
-export const base = 'https://'+settings.domain;
+export const host = 'https://'+settings.domain;
+export const api = 'https://'+settings.api;
 
 const options = {
-  baseURL: settings.domain,
+  baseURL: settings.api,
   method: 'get',
   headers: {
     'Content-Type': 'application/json',

@@ -1,7 +1,7 @@
 import { Button, InputAdornment, Container, CircularProgress, Typography, Paper } from '@material-ui/core';
 import { Check, Error, Visibility } from '@material-ui/icons';
 import { styled } from '@material-ui/core/styles';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Qrcode from './Qrcode';
 import clipboardCopy from '../utils/clipboardCopy' 
 import highlightTarget from '../utils/highlight' 
@@ -36,8 +36,22 @@ const Converter = ({strings}) => {
   const [loading, setLoading] = useState(false);
   const [copyMsg, setCopyMsg] = useState(strings.copyDefault);
   const [btnText, setBtnText] = useState(strings.btnGo);
-  const [decoding, setDecoding] = useState(false);
+  const [decoding, setDecoding] = useState(() => {
+    const shortcode = window.location.pathname.replace('/','')
+    return !shortcode ? false : shortcode 
+  });
   const [stats, setStats] = useState(false);
+  const [redirecting, setRedirecting] = useState(() => {
+    return !!window.location.pathname.replace('/','')
+  });
+
+  // Redirect if given a shortcode in url
+  useEffect(() => {
+    if (redirecting && decoding && !stats)  {
+      console.log('shortcode found '+ decoding)
+      expand();
+    }
+  })
 
   const shorten = () => {
     if(!url64) return;
@@ -57,7 +71,16 @@ const Converter = ({strings}) => {
     setLoading(true);
     viewUrl(decoding, (res) => {
       setStats(res);
-      setBtnText(strings.btnDone);
+      if (redirecting){
+        setRedirecting(false)
+        if (res) {
+          update(res.link)
+          if (!window.location.search)
+            window.location.href = res.link
+        } else 
+        update("Unknown shortcode "+ decoding)
+      } else 
+        setBtnText(strings.btnDone);
     }, (err) => {
       console.log(err);
       setBtnText(strings.btnError);
@@ -103,6 +126,15 @@ const Converter = ({strings}) => {
   const copy = () => ( clipboardCopy('#shortcode', (bool) => {
     setCopyMsg(bool ? strings.copySuccess : strings.copyFailed )
   })); 
+
+  if (!!redirecting ) {
+    return (
+      <div  className='App-link'>
+        <Typography variant='h1'>Redirecting to...</Typography>
+        <Typography variant='subtitle1'>{stats ? stats.link : 'Unknown' }</Typography>
+      </div>
+    )
+  }
 
   return (
     <Container maxWidth="sm">
