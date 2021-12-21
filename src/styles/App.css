@@ -79,12 +79,23 @@ svg {
   justify-content: center;
 }
 
+.footer span {
+  padding-left: 2em;
+}
+
 a {
   color: #edf6f9;
   margin: 8px;
 }
 
-/* input {
-  color: #e1f5fe !important;
-} */
+.featureTitle {
+  padding-top: 80px;
+  margin-top: 120px;
 
+}
+
+.feature {
+  margin-bottom: 120px;
+  padding-top: 80px;
+  background: url('../images/earth-nasa.jpeg');
+}

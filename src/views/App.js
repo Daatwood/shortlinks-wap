@@ -1,8 +1,9 @@
 import { Container } from '@material-ui/core';
 import Converter from '../components/Converter'
-import strings from '../data/strings.json'
+import {header, converter, features, footer} from '../data/strings.json'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
+import FeatureList from '../components/FeatureList'
 
 import '../styles/App.css';
 
@@ -10,9 +11,10 @@ function App() {
   return (
     <div className="App">
       <Container maxWidth="sm">
-        <Header {...strings.header} />
-        <Converter strings={strings.converter} />
-        <Footer {...strings.footer} />
+        <Header {...header} />
+        <Converter strings={converter} />
+        {/* <FeatureList strings={features} /> */}
+        <Footer {...footer} />
       </Container>
     </div>
   );

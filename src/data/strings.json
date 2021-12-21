@@ -18,5 +18,22 @@
     "copyDefault": "Click to copy",
     "copySuccess": "Copied Successfully!",
     "copyFailed": "Copied failed."
-  }
+  },
+  "features": [
+    {
+      "name": "Feature 1",
+      "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+      "link": "https://example.com"
+    },
+    {
+      "name": "Feature 2",
+      "description": "sed do eiusmod tempor incididunt ut labore et dolore.",
+      "link": "https://example.com"
+    },
+    {
+      "name": "Feature 3",
+      "description": " Ut enim ad minim veniam magna aliqua.",
+      "link": "https://example.com"
+    }
+  ]
 }

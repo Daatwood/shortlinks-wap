@@ -1,4 +1,4 @@
-import { Button, InputAdornment, Container, CircularProgress, Typography, Paper } from '@material-ui/core';
+import { Button, InputAdornment, Container, CircularProgress, Typography } from '@material-ui/core';
 import { Check, Error, Visibility } from '@material-ui/icons';
 import { styled } from '@material-ui/core/styles';
 import React, { useState, useEffect } from 'react';
@@ -8,6 +8,7 @@ import highlightTarget from '../utils/highlight'
 import StyledInput from './StyledInput'
 import validateUrl, { shortcodeUrl } from '../utils/validateUrl';
 import { shortenUrl, viewUrl } from '../actions';
+import Stats from './Stats'
 
 const white = '#edf6f9';
 
@@ -57,19 +58,21 @@ const Converter = ({strings}) => {
     if(!url64) return;
     setLoading(true);
     shortenUrl(url64, (newUrl) => {
+      setLoading(false);
       setShort(newUrl);
       setBtnText(strings.btnDone);
     }, (err) => {
+      setLoading(false);
       console.log(err);
       setBtnText(strings.btnError);
     });
-    setLoading(false);
   }
 
   const expand = () => {
     if (!decoding) return;
     setLoading(true);
     viewUrl(decoding, (res) => {
+      setLoading(false);
       setStats(res);
       if (redirecting){
         setRedirecting(false)
@@ -83,9 +86,9 @@ const Converter = ({strings}) => {
         setBtnText(strings.btnDone);
     }, (err) => {
       console.log(err);
+      setLoading(false);
       setBtnText(strings.btnError);
     });
-    setLoading(false);
   }
 
   const update = (val) => {
@@ -163,8 +166,7 @@ const Converter = ({strings}) => {
             variant={(!error && !!url) || short ? "contained" : "outlined" } 
             disabled={loading || !url || error}
           >
-          { loading ? '' : btnText }
-          { loading && <CircularProgress /> }
+            { loading ? <CircularProgress /> : btnText }
           </MinifyButton>
         }
         { short && <Qrcode url={short}/> }
@@ -181,14 +183,7 @@ const Converter = ({strings}) => {
             }}
           />
         }
-        { stats && 
-          <Paper>
-            <Typography variant='caption'>Full Link:</Typography>
-            <Typography variant='subtitle1'>{stats.link}</Typography>
-            <Typography variant='caption'>Redirects:</Typography>
-            <Typography variant='overline'>{stats.redirects}</Typography>
-          </Paper>
-        }
+        <Stats data={stats}/>
       </form>
       { lastShort && 
         <div className='last-url'>
